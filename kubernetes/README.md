@@ -1,6 +1,6 @@
 # Kubernetes
 
-<img align="left" src="../../../../Desktop/毕设/WechatIMG35.png" style="zoom:50%" />
+<img src="img/WechatIMG35.png" style="zoom:50%;" />
 
 > #### 作为谷歌背书的一个容器编排平台，一经推出就受到万人追捧。同时它也是云原生道路上的重要实践。
 

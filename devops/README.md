@@ -1,6 +1,6 @@
 # Devops
 
-<img align="left" src="img/devops.png" alt="image-20200415143732424" style="zoom:50%;" />
+<img src="img/devops.png" alt="image-20200415143732424" style="zoom:50%;width:" />
 
 
 
