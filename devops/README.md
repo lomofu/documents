@@ -1,6 +1,6 @@
 # Devops
 
-<img src="https://zh.wikipedia.org/wiki/DevOps#/media/File:Devops.svg">
+<img align="left" src="img/devops.png" alt="image-20200415143732424" style="zoom:50%;" />
 
 
 
