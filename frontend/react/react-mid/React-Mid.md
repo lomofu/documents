@@ -391,3 +391,247 @@ export default class Class extends React.Component {
 >
 > 但是react有hooks可以解决上述问题，在后续学习中也会了解到
 
+
+
+#### 4.动态路由
+
+一般我们都有动态的id传入然后根据id来渲染组件的需求，相同的是react对于动态路由和vue是类似的传值通过 `:参数名` 来实现
+
+```jsx
+export default function IRouter() {
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/" component={Home}></Route>
+        <Route path="/home" component={Home}></Route>
+        <Route path="/login" component={Login}></Route>
+        <Route path="/order/:id" component={Order}></Route>
+      </Switch>
+    </Router>
+  );
+}
+```
+
+> 代码中order后的id就是通过动态的传入，需要注意的是如果id不写的话，那么路由就无法匹配到
+
+
+
+#### 5.重定向redirect
+
+对于一些业务，需要登录或者权限才可以看到，否则重定向到另一个页面，vue中在路由对象中添加redirect关键字，而react中是引入`Redirect`组件
+
+```jsx
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
+
+
+ <Route path="/home" component={Home}>
+          <Redirect to="/login"></Redirect>
+ </Route>
+```
+
+> 上述代码 当输入/home 会跳转到登录页面
+
+
+
+## 6.React Hooks
+
+*使用react hooks要确保版本大于 `16.8`* 
+
+>#### React Hooks 所要解决的就是有状态组件繁重的生命周期，需要写很多重复的代码。而通过hook的机制，可以让我们在hooks写原来生命周期所写的逻辑，但是组件本身使用的是无状态的函数式组件。
+
+
+
+### 1.useState
+
+useState 替代的是之前有状态组件中state，并且更新是通过`setState()`方法触发
+
+```jsx
+import React, { useState } from "react";
+```
+
+首先是引入该api
+
+```jsx
+  const [count, setCount] = useState(0);
+```
+
+通过调用useState方法，往里传入状态的初始值，左侧通过一个数组接受返回值，第一个是该状态的名称，第二个是更新该状态的方法名称
+
+```jsx
+<h1>当前函数式组件：{count}</h1>
+```
+
+渲染直接写该名称即可
+
+```jsx
+<Button onClick={() => setCount(count + 1)}>增加</Button>
+```
+
+更新状态也十分简单，调用之前写的更新状态的函数名，传入新的值即可。这里这个函数名并不一定要写setXX，也可以是其他命名。
+
+```jsx
+import React, { useState } from "react";
+import { Alert, Result, Button } from "antd";
+import { Link } from "react-router-dom";
+
+export default function Home() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <Alert message="个人中心"></Alert>
+      <Result status="success" title="欢迎来到个人中心"></Result>
+      <h1>当前函数式组件：{count}</h1>
+      <Button onClick={() => setCount(count + 1)}>增加</Button>
+      <br />
+      <Link to="/login">点击跳转回登录页面</Link>
+    </div>
+  );
+}
+```
+
+完整代码
+
+> 通过对比可以发现，hooks api省去了有状态组件需要首先定义`state`，然后通过统一的`setState`方法调用更新。并且在render函数中，需要通过this.state.状态名调用。而相比之下，useState的方式显然更加简洁。
+
+
+
+### 2.useEffect
+
+useEffect函数的对应的有生命周期组件的 `componentDidMount()` 和 `componentDidUpdate` 。也就是在组件加载时会执行，或者当组件中state发生变化时会执行。
+
+```jsx
+  useEffect(() => console.log("useEffect函数被执行"));
+```
+
+当我们渲染完界面，并点击按钮更新count后，控制台打印如下
+
+![image-20200429034611128](img/image-20200429034611128.png)
+
+可以发现，该函数的确被执行了两次。也就是说，当我们的**组件加载**的时候和**数据发生更新**的时候就会执行该函数。
+
+
+
+但是假如在该函数中进行ajax异步请求，每次在更新数据时都会进行一次ajax请求，这不是我们想要的，这时候如果希望该函数在数据更新时不会执行，只需要在第二个参数中传入一个空数组即可
+
+```jsx
+  useEffect(() => console.log("useEffect函数被执行"),[]);
+```
+
+
+
+## 7.路由Hooks
+
+通过hooks可以对路由的参数，路由的跳转等实现
+
+
+
+### 1.useParams
+
+先来看看有状态组件获取路由参数
+
+```jsx
+this.props.match.params.路由参数名
+```
+
+不得不说真的好长。。。
+
+那么hooks就相对简单了
+
+```jsx
+ import { useParams } from "react-router-dom";
+
+const params = useParams();
+
+console.log(params);
+//{id: "123"}
+```
+
+ 该函数返回的是一个json对象 
+
+完成的例子:
+
+```jsx
+import React from "react";
+import { useParams } from "react-router-dom";
+import { Card } from "antd";
+
+export default function Order() {
+  const { id } = useParams();
+  return (
+    <Card title={`订单号：${id}`}>
+      <p>内容1</p>
+      <p>内容2</p>
+      <p>内容3</p>
+    </Card>
+  );
+}
+```
+
+
+
+### 2.useHistory
+
+顾名思义该函数式是用来操作路由的跳转相关的
+
+```jsx
+import { useParams, useHistory } from "react-router-dom";
+ 
+ const router = useHistory();
+ console.log(router);
+```
+
+同样该函数返回一个json对象
+
+![image-20200429041700363](img/image-20200429041700363.png)
+
+都是与路由操作相关的
+
+```jsx
+<Button onClick={() => router.push("/login")}>登录</Button>
+```
+
+使用也比较简单，而在有状态组件中需要
+
+```jsx
+this.props.history.push("/")
+```
+
+所以对比一下就会发现hooks带来的是减少代码，并且使用更加简单
+
+
+
+# 8.Redux
+
+类似vuex用来全局状态管理
+
+
+
+### 三大原则
+
+#### 单一数据源
+
+**整个应用的 state 储存在一棵 object tree 中，并且这个 object tree 只存在于唯一一个store中。**
+
+![image-20200429043342323](img/image-20200429043342323.png)
+
+>其实和vuex差不多的
+
+#### State 是只读的
+
+**唯一改变 state 的方法就是触发 action，action 是一个用于描述已发生事件的普通对象。**
+
+>同样的对于vuex而言，更改数据的唯一方法就是通过mutations对象中的方法
+
+
+
+#### 使用纯函数来执行修改
+
+**为了描述 action 如何改变 state tree ，你需要编写 reducers。**
+
+>*Reducer* (也称为 *reducing function*) 函数接受两个参数：之前累积运算的结果和当前被累积的值，返回的是一个新的累积结果。该函数把一个集合归并成一个单值。
+
