@@ -25,6 +25,16 @@
 
 
 
+## 特点
+
+* #### Declarative(声明式编码)
+
+* #### Componenet-Based(组件化编码)
+
+* #### 高效-高效的DOM DIFF算法，最小化页面重绘
+
+* #### 单向数据流
+
 
 
 ## 1.环境准备
@@ -87,7 +97,7 @@ yarn add react react-dom --save
 
 ![image-20200422200123451](img/image-20200422200123451.png)
 
-在项目目录下生成了所需依赖包盒package.json
+在项目目录下生成了所需依赖包含package.json
 
 
 
@@ -220,11 +230,11 @@ npm install --save babel-standalone
 const element = <h1>Hello, world!</h1>;
 ```
 
-> ##### 这个有趣的标签语法既不是字符串也不是 HTML。
+> #### 这个有趣的标签语法既不是字符串也不是 HTML。
 >
-> ##### 它被称为 JSX，是一个 JavaScript 的语法扩展。我们建议在 React 中配合使用 JSX，JSX 可以很好地描述 UI 应该呈现出它应有交互的本质形式。JSX 可能会使人联想到模版语言，但它具有 JavaScript 的全部功能。
+> #### 它被称为 JSX，是一个 JavaScript 的语法扩展。我们建议在 React 中配合使用 JSX，JSX 可以很好地描述 UI 应该呈现出它应有交互的本质形式。JSX 可能会使人联想到模版语言，但它具有 JavaScript 的全部功能。
 >
-> ----React 官网
+> #### ----React 官网
 
 以上是React官方对于jsx的解释，其实jsx是一种语法糖。所以需要babel这样的工具进行编译转换
 
@@ -390,6 +400,10 @@ function Hello() {
 - #### 组件销毁阶段
 
 ![image-20200422231510740](img/image-20200422231333604.png)
+
+
+
+![image-20200505234615566](img/React-Base.png)
 
 #### **Initialization**
 

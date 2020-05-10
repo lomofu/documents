@@ -522,6 +522,8 @@ useEffect函数的对应的有生命周期组件的 `componentDidMount()` 和 `c
   useEffect(() => console.log("useEffect函数被执行"),[]);
 ```
 
+这里只是入门，后续会针对hooks再学习
+
 
 
 ## 7.路由Hooks
@@ -607,7 +609,7 @@ this.props.history.push("/")
 
 # 8.Redux
 
-类似vuex用来全局状态管理
+类似vuex用来全局状态管理,它是一个单独的js库,不是react的插件
 
 
 
@@ -635,3 +637,245 @@ this.props.history.push("/")
 
 >*Reducer* (也称为 *reducing function*) 函数接受两个参数：之前累积运算的结果和当前被累积的值，返回的是一个新的累积结果。该函数把一个集合归并成一个单值。
 
+
+
+**纯函数**是函数式编程的概念，必须遵守以下一些约束。
+
+> - 不得改写参数
+>
+> - 不能调用系统 I/O 的API
+>
+> - #### 不能调用`Date.now()`或者`Math.random()`等不纯的方法，因为每次会得到不一样的结果
+
+由于 Reducer 是纯函数，就可以保证同样的State，必定得到同样的 View。Reducer 函数里面不能改变 State，必须返回一个全新的对象
+
+```javascript
+// State 是一个对象
+function reducer(state, action) {
+  return Object.assign({}, state, { thingToChange });
+  // 或者
+  return { ...state, ...newState };
+}
+
+// State 是一个数组
+function reducer(state, action) {
+  return [...state, newItem];
+}
+```
+
+
+
+### Redux组成
+
+#### Store
+
+> store 就是把action与reducer联系到一起的对象
+
+职责:
+
+* 维护应用的state
+* 提供getState()方法获取state
+* 提供dispatch()方法发送action
+* 提供subscribe()来注册监听
+* 通过subscribe()返回值来注销监听
+
+
+
+#### State
+
+> 状态
+
+
+
+#### Action
+
+> 描述有事情发生，并不描述如何去更新state
+
+* 本质是一个js对象
+* 必须包含type属性
+
+
+
+#### Reducer
+
+* 本质是函数
+* 响应发过来的action
+* 函数接受两个参数，一个是初始化state，第二个是发过来的action
+* 必须要有return返回值
+
+
+
+### Redux流程
+
+
+
+![image-20200504183423518](img/image-20200504183423518.png)
+
+
+
+
+
+### 使用
+
+#### 安装
+
+```bash
+yarn add redux 
+```
+
+安装redux，注意这里的redux是公用的javascript库
+
+```
+yarn add react-redux
+```
+
+安装后可以在react中使用
+
+```bash
+yarn add redux-thunk
+```
+
+该中间件可以使在 Redux 应用中实现异步性，类似vuex中actions对象下所对应的异步
+
+
+
+#### Provider 组件
+
+> React-Redux 提供`Provider`组件，可以让容器组件拿到`state`
+
+```react
+import React from "react";
+import "./App.scss";
+import { Provider } from "react-redux";
+import "antd/dist/antd.css";
+import Router from "./router";
+function App() {
+  return (
+    <Provider store={store}>
+      <div className="app">
+        <nav>菜单栏</nav>
+        <Router></Router>
+      </div>
+    </Provider>
+  );
+}
+
+export default App;
+```
+
+上面代码中，`Provider`在根组件外面包了一层，这样一来，`App`的所有子组件就默认都可以拿到`state`了
+
+
+
+#### 创建store
+
+使用**`createStore(reducer, [preloadedState], enhancer)`**方法
+
+> #### 参数
+>
+> 1. #### `reducer` *(Function)*: 接收两个参数，分别是当前的 state 树和要处理的action，返回新的state 树。
+>
+> 2. #### [`preloadedState`] *(any)*: 初始时的 state。 在同构应用中，你可以决定是否把服务端传来的 state 水合（hydrate）后传给它，或者从之前保存的用户会话中恢复一个传给它。如果你使用`combineReducers` 创建 `reducer`，它必须是一个普通对象，与传入的 keys 保持同样的结构。否则，你可以自由传入任何 `reducer` 可理解的内容。
+>
+> 3. #### `enhancer` *(Function)*: Store enhancer 是一个组合 store creator 的高阶函数，返回一个新的强化过的 store creator。这与 middleware 相似，它也允许你通过复合函数改变 store 接口。
+>
+> #### 返回值
+>
+> #### [`Store`]: 保存了应用所有 state 的对象。改变 state 的惟一方法是 dispatch  action。你也可以 subscribe 监听 state 的变化，然后更新 UI。
+
+
+
+```react
+import { applyMiddleware, createStore } from "redux";
+import thunk from "redux-thunk";
+
+const initalState = {};
+
+const middleware = [thunk];
+
+const store = createStore(
+  () => [],
+  initalState,
+  applyMiddleware(...middleware)
+);
+
+export default store;
+```
+
+>#### createStore 传入【】可能含有多个reducer,initalState（初始化的状态），applyMiddlewares()
+>
+>----------------------------------------------
+>
+>#### `applyMiddlewares`这个方法到底是干什么的？
+>
+>#### 它是 Redux 的原生方法，作用是将所有中间件组成一个数组，依次执行。所以这里定义了一个中间件数组，并使用es6的剩余写法传入此方法中。
+
+
+
+#### 改造reducers
+
+一个项目中的reducers是非常多的，如果全部写在一起，体积也是非常庞大，所以需要分模块来书写，最后通过 `combineReducers`方法进行合并
+
+
+
+```react
+import { combineReducers } from "redux";
+import commonFn from "./common/index";
+
+export default combineReducers({
+  common: commonFn,
+});
+```
+
+
+
+```react
+const initialState = {
+  name: "lomofu",
+};
+
+export default function (state = initialState, action) {
+  switch (action.type) {
+    default:
+      return state;
+  }
+}
+```
+
+写到这里是不是有一种似曾相识的感觉，没错这个不就类似vuex中modules那个概念吗
+
+
+
+#### getState()
+
+可以获取store中的值
+
+```react
+import store from "./store";
+
+function App() {
+    console.log(store.getState())
+  return (
+    <Provider store={store}>
+      <div className="app">
+        <nav>菜单栏</nav>
+        <Router></Router>
+      </div>
+    </Provider>
+  );
+}
+```
+
+> 返回一个object
+>
+> ```json
+> {
+> 	'common':{
+> 		'name': "lomofu"
+> 	}
+> }
+> ```
+
+
+
+#### connect()
