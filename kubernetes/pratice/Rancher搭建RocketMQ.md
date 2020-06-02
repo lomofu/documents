@@ -37,20 +37,20 @@ https://hub.docker.com/r/huanwei/rocketmq
 端口10911
 
 ```bash
-/bin/bash -c 'echo "brokerIP1 = 114.67.73.222">> ../conf/broker.conf; sh mqbroker -c ../conf/broker.conf autoCreateTopicEnable=true -n 114.67.73.222:9876'
+/bin/bash -c 'echo "brokerIP1 = your ip">> ../conf/broker.conf; sh mqbroker -c ../conf/broker.conf autoCreateTopicEnable=true -n your ip:9876'
 ```
 
 > 解析
 
 
 ```bash
-/bin/bash -c 'echo "brokerIP1 = 114.67.73.221">> ../conf/broker.conf; 
+/bin/bash -c 'echo "brokerIP1 = your ip">> ../conf/broker.conf; 
 ```
 
 这个命令是在启动broker之前往broker.conf添加配置
 
 ```bash
-sh mqbroker -c ../conf/broker.conf autoCreateTopicEnable=true -n 114.67.73.221:9876’
+sh mqbroker -c ../conf/broker.conf autoCreateTopicEnable=true -n ip:9876’
 ```
 
 这个命令指定broker配置文件启动，-n指定namesev服务地址

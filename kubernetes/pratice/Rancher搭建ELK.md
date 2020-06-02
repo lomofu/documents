@@ -187,9 +187,9 @@ input {
  stdin { }
     jdbc {
         #注意mysql连接地址一定要用ip，不能使用localhost等
-        jdbc_connection_string => "jdbc:mysql://mysql-internet-cn-east-2-8be18d8fb68d4876.rds.jdcloud.com:3306/ben_account?useUnicode=true&characterEncoding=utf8&&autoReconnect=true&useSSL=false&&serverTimezone=CTT"
-        jdbc_user => "ben_account"
-        jdbc_password => "Benk8sformysql"
+        jdbc_connection_string => "jdbc:mysql://xxxxxxxx/ben_account?useUnicode=true&characterEncoding=utf8&&autoReconnect=true&useSSL=false&&serverTimezone=CTT"
+        jdbc_user => "xxxxxx"
+        jdbc_password => "xxxxxxxx"
         #这个jar包的地址是容器内的地址
         jdbc_driver_library => "/opt/kibana/config/mysql-connector-java-8.0.19.jar"
         #这个jar包驱动 如果是8.0就用cj否则不需要
