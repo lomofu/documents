@@ -61,7 +61,7 @@ npm -v
 
 ## 2.知识点
 
-- #### 编写helloword
+- #### <a href="#编写hellword">编写helloword</a>
 
 - #### jsx语法
 
@@ -81,7 +81,7 @@ npm -v
 
 
 
-## 3.编写hellword
+## <a name="编写hellword">3.编写hellword</a>
 
 
 

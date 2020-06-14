@@ -10,7 +10,7 @@
 docker pull elasticsearch:6.5.3
 ```
 
-![image-20200312024112135](../../../../../Library/Application Support/typora-user-images/image-20200312024112135.png)
+![image-20200312024112135](img/image-20200312024112135.png)
 
 **参数**：
 
