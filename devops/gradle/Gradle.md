@@ -195,7 +195,13 @@ upper:HELLO
 gradle构建的生命周期主要为三个阶段: `Initialization`, `Configuration`, `Execution`
 
 - **Initialization**: Gradle支持单个或者多个工程的构建。在initialization阶段，Gradle决定哪些工程将参与当前构建过程，并为每一个这样的工程创建一个**Project**实例。一般情况下，参与构建的工程信息将在`settings.gradle`中定义
+
+  
+
 - **Configuration**: 在这一阶段，配置**project**实例。所有工程的构建脚本都会被执行。**Task**, **configuration**和许多其他的对象将被创建和配置。
+
+  
+
 - **Execution**: 在之前的**configuration**阶段，**task**的一个子集被创建并配置。这些子集来自于作为参数传入gradle命令的task名字，在execution阶段，这一子集将被依次执行。
 
 
@@ -551,7 +557,7 @@ tasks.register('myTask') {
 I am not affected
 ```
 
-3. **使用`enable`flag**
+3. **使用 `enable` flag**
 
 每个任务都有一个 `enable`的标志位，并且默认是true。如果我们将其设置为false，那么就可以做到阻止一个任务的执行。
 
@@ -578,7 +584,7 @@ BUILD SUCCESSFUL in 0s
 
 4. **任务超时**
 
-每一个任务都有一个 `timeout`属性可以用来限制任务执行的时间。当一个任务达到了超时时间，任务执行的线程将会被打断。任务会被标记为失败。其他的任务还是会继续执行。如果我们使用`—continue`, 其他任务将会继续在这个任务后执行。
+每一个任务都有一个 `timeout` 属性可以用来限制任务执行的时间。当一个任务达到了超时时间，任务执行的线程将会被打断。任务会被标记为失败。其他的任务还是会继续执行。如果我们使用`—continue`, 其他任务将会继续在这个任务后执行。
 
 ```groovy
 tasks.register("hangingTask") {
@@ -589,3 +595,233 @@ tasks.register("hangingTask") {
 }
 ```
 
+
+
+## Gradle依赖管理
+
+依赖管理主要由`项目依赖` 和 `项目发布`
+
+1. **项目依赖** :  一般的大型工程都需要引入一切其他工程的文件来完成某项功能。比如我们如果需要Spring就得把它的类库加入进来。这些加载进来的文件就是工程的依赖。对于Gradle，我们需要告诉它工程的依赖是什么，它们在哪里。然后帮助你加入到工程中，依赖可能需要去远程库下载，比如 `Maven` 或者`lvy` 库。 也可以是本地库，甚至可能是另一个工程。我们称这个过程叫`依赖解决`。
+
+   通常，依赖本身也有依赖。Gradle构建你的工程时候，会去找这些依赖。我们称之为`依赖解决`。
+
+   
+
+2. **项目发布**：大部分工程构建的主要目的脱离工程使用。例如，生成jar包，包括源代码，文档等，然后发布出去。这些输出的文件构成了项目的发布内容。Gradle 也会为你分担这些工作。你声明了发布到哪，Gradle 就会发布到哪。“发布”的意思就是你想做什么。比如，复制到某个目录，上传到 `Maven` 到 `lvy` 仓库。或者其他项目使用，这些都可以称之为 `发行`。
+
+![image-20210318135141922](img/image-20210318135141922.png)
+
+
+
+### 依赖声明
+
+#### 声明依赖
+
+`build.gradle`
+
+```groovy
+apply plugin 'java'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'org.hibernate', name:'hibernate-core',version: '5.4.2.Final'
+  testCompile group : 'junit', name: 'junit', version: '5.+'
+}
+```
+
+
+- 声明了 `Hibernate-core 5.4.2.Final.jar` 是编译期必需的依赖。并且与其关联的依赖也会一并被加载进来。
+- 声明了 **项目测试阶段**是  `5.0`  版本以上的 `Junit`。
+- 声明了 Gradle 可以去 `Maven`中央仓库去找这些依赖。
+
+
+
+对比Maven
+
+```xml
+<dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
+        </dependency>
+</dependencies>
+```
+
+
+
+
+
+#### 什么是依赖配置？
+
+Gradle 中依赖以组的形式来划分不同的配置，每个配置只有一组指定的依赖。我们称之为**依赖配置**。例如，一些依赖应该被用于编译源代码，剩余其他只在运行时才可以使用。
+
+
+
+![image-20210318162443298](img/image-20210318162443298.png)
+
+
+
+许多 `Gradle plugins` 预先在项目中配置。例如 `Java plugins`， 增加了许多源码编译时候需要的`classpaths`， 执行`tests` 和其他。
+
+![image-20210318162254508](img/image-20210318162254508.png)
+
+
+
+![image-20210318162319906](img/image-20210318162319906.png)
+
+
+
+- **Compile**
+
+  编译范围依赖在所有的classpaths 中可以使用，同时把它们打包
+
+- **Runtime**
+
+  `runtime`依赖在运行和测试系统时需要，但是在编译时候不需要。比如编译时只需要`JDBC API JAR`,而只在运行时候才需要`JDBC驱动`实现。默认情况下，还包括编译时依赖项。
+
+- **testCompile**
+
+  测试阶段需要的附加依赖。默认情况下，包括编译的产生的类和编译时的依赖。
+
+- **testRuntime**
+
+  测试运行期需要
+
+  不同的插件提供了不同的标准配置，甚至可以定义自己的配置项。默认情况下，它包括运行时和测试编译依赖项
+
+
+
+#### 外部依赖
+
+依赖的类型有很多，其中一种类型称之为`外部依赖`。这种依赖由外部构建或者不同的仓库中，例如`Maven`中央仓库 或者 `Ivy`仓库中或者你的本地文件系统中的某个文件目录。
+
+
+
+**定义外部依赖**
+
+`build.gradle`
+
+```groovy
+dependencies {
+	compile group: 'org.hibernate', name:'hibernate-core',version: '5.4.2.Final'
+}
+```
+
+外部依赖包含 `group`， `name`， `version` 几个属性。根据选取的仓库不同， group 和 version也可能是可选的。
+
+当然也可以更加简洁的方式来声明外部依赖。采用：将三个属性拼接在一起即可。**`group:name:version`**
+
+```groovy
+dependencies {
+    compile 'org.hibernate:hibernate-core:3.6.7.Final'
+}
+```
+
+
+
+#### 仓库
+
+Gradle 会去仓库寻找所需要的外部依赖。仓库是一个按照 `group`， `name` 和 `version` 规则进行存储一些文件。 Gradle
+可以支持不同的仓库存储格式，例如`Maven` 和 `Ivy`, 并且还提供了多种与仓库进行通信的方式，如通过 **本地文件系统** 或者 **HTTP**。
+
+**使用Maven中央仓库**
+
+```groovy
+repositories {
+    mavenCentral()
+}
+```
+
+**使用Maven远程仓库**
+
+```groovy
+repositories {
+    maven {
+        url "http://repo.mycompany.com/maven2"
+    }
+}
+```
+
+**使用Ivy仓库**
+
+```groovy
+repositories {
+    ivy {
+        url "http://repo.mycompany.com/repo"
+    }
+}
+```
+
+**使用Ivy本地目录**
+
+```groovy
+repositories {
+    ivy {
+        // URL can refer to a local directory
+        url "../local-repo"
+    }
+}
+```
+
+一个项目可以**采用多个库**，Gradle会按照顺序在各个仓库中寻找所需要的依赖文件，并且一旦找到第一个便停止搜索。
+
+
+
+#### 打包发布
+
+依赖配置也被用于发布文件，称之为打包发布或者发布。
+
+插件对于打包提供了完美的支持，所以通常无需特别进行配置，但是如果需要发布，则需要在`uploadArchives`任务中添加一个仓库。
+
+**发布到Ivy仓库**
+
+```groovy
+uploadArchives {
+    repositories {
+        ivy {
+            credentials {
+                username "username"
+                password "pw"
+            }
+            url "http://repo.mycompany.com"
+        }
+    }
+}
+```
+
+执行 `gradle uploadArchives`，Gradle便会构建并上传你的jar 包，同时生成`ivy.xml`一起上传到目标仓库。
+
+**发布到Maven仓库**
+
+```groovy
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://localhost/tmp/myRepo/")
+        }
+    }
+}
+```
+
+发布到Maven仓库时，需要Maven插件的支持。当然Gradle也会为你生成一个`pom.xml`一起上传到目标仓库
+
+
+
+
+
+
+
+# Reference
+
+1.https://www.w3cschool.cn/gradle/sh8k1htf.html
+
+2.https://docs.gradle.org/current/userguide/declaring_dependencies.html
