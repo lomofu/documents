@@ -669,16 +669,6 @@ Gradle 中依赖以组的形式来划分不同的配置，每个配置只有一�
 
 
 
-许多 `Gradle plugins` 预先在项目中配置。例如 `Java plugins`， 增加了许多源码编译时候需要的`classpaths`， 执行`tests` 和其他。
-
-![image-20210318162254508](img/image-20210318162254508.png)
-
-
-
-![image-20210318162319906](img/image-20210318162319906.png)
-
-
-
 - **Compile**
 
   编译范围依赖在所有的classpaths 中可以使用，同时把它们打包
@@ -816,11 +806,177 @@ uploadArchives {
 
 
 
+## Gradle插件
+
+许多 `Gradle plugins` 预先在项目中配置。例如 `Java plugins`， 增加了许多源码编译时候需要的`classpaths`，添加了新任务（例如：`JavaCompile`），域对象（ 例如：`SourceSet` ）， 执行`tests` ，约定（ 例如主要的Java源代码是位于 ***src/main/java ***）
+
+![image-20210318162254508](img/image-20210318162254508.png)
+
+
+
+![image-20210318162319906](img/image-20210318162319906.png)
+
+插件应用是幂等性的。也就是说，一个插件可以被应用多次。如果以前已经应用了插件，任何进一步的应用都不会再有任何效果。
+
+
+
+### 插件的行为
+
+- 将任务添加到项目 （如编译、测试）
+- 使用有用的默认配置对已添加的任务进行预配置
+- 向项目中添加依赖配置
+- 扩展对现有类型添加新的属性和方法
+
+
+
+### 插件的类型
+
+Gradle中有两个主要的插件类型，**二进制插件**`binary plugins` 和 脚本插件 `script plugins`。
+
+#### **脚本插件**
+
+ 是额外的构建脚本，更进一步配置构建过程，通常实现了一个声明式方法用来操作构建。它们通常在构建中使用，也可以外部化并通过远程位置来访问。
+
+在 `build.gradle`同级目录下新建一个  `other.gradle`，写入
+
+```groovy
+ext {
+	ver= '1.0'
+	url= 'https://www.lomofu.com'
+}
+```
+
+2. 然后在`build.gradle` 中写入
+
+```groovy
+apply from: 'other.gradle'
+
+task testBuildPlugin {
+	doLast {
+         task -> println "other version: $ver, other url: $url"
+    }
+}
+```
+
+```bash
+>  gradle-learning gradle testBuildPlugin
+
+> Task :testBuildPlugin
+other version: 1.0, other url: https://www.lomofu.com
+
+BUILD SUCCESSFUL in 1s
+```
+
+
+
+#### 二进制插件(对象插件)
+
+实现了 `Plugin`接口或者声明了使用其中一种DSL语言。它可以驻留在插件JARA中的一个构件脚本和项目层次结构或外部。每个插件由插件标，一些核心插件是使用**短名称** （例如 `java`）来应用，一些社区插件使用插件ID的完全限定名称，有时它允许指定一个插件类，二进制插件实现了 `org.gradle.api.Plugin`接口的插件。
+
+1. **内部插件**：gradle自己实现的
+
+```groovy
+apply plugin: JavaPlugin
+```
+
+或者
+
+```groovy
+apply plugin: 'java'
+```
+
+2. **社区插件** 托管在 `https://plugins.gradle.org/
+
+使用插件DSL写法
+
+```groovy
+plugins {
+  id "com.redpillanalytics.checkmate.obi" version "12.1.2"
+}
+```
+
+或者
+
+```groovy
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.redpillanalytics:checkmate-obi:12.1.2"
+  }
+}
+
+apply plugin: "com.redpillanalytics.checkmate.obi"
+```
+
+3. **第三方插件**： 通常都是 jar 文件，想要让构建脚本知道第三方插件的存在，需要使用`buildscript`来设置
+
+```groovy
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.redpillanalytics:checkmate-obi:12.1.2"
+  }
+}
+
+apply plugin: "com.redpillanalytics.checkmate.obi"
+```
+
+
+
+### 应用插件
+
+插件都认为是被应用，通过`Project.apply( )`方法来完成。
+
+`build.gradle`
+
+```groovy
+apply plugin: 'java'
+```
+
+插件都有表示它们自己的一个名字。例如上述中，我们使用短名为**java** 去应用 **JavaPlugin**
+
+**通过类型应用插件**
+
+`build.gradle`
+
+```groovy
+apply plugin: org.gradle.api.plugins.JavaPlugin
+```
+
+由于Gradle的默认导入，我们可以写成
+
+```groovy
+apply plugin: JavaPlugin
+```
+
+
+
+### 标准的Gradle插件
+
+#### 语言插件
+
+| 插件id | 自动应用    | 与什么插件一起使用 | 描述                                                         |
+| ------ | ----------- | ------------------ | ------------------------------------------------------------ |
+| java   | java-base   | -                  | 向项目中添加Java编译，测试和捆绑的能力。它是很多其他Gradle插件的基础服务。 |
+| groovy | groovy-base | -                  | 添加Groovy项目构建的支持                                     |
+| scala  | scala-base  | -                  | 添加对于Scala项目的支持                                      |
+| antlr  | java        | -                  | 添加对使用[Antlr](http://www.antlr.org/)作为生成解析器的支持。 |
 
 
 
 
-# Reference
+
+
+
+## Reference
 
 1.https://www.w3cschool.cn/gradle/sh8k1htf.html
 
