@@ -45,9 +45,9 @@
 
 <img src="https://datascience.foundation/img/pdf_images/underfitting_and_overfitting_in_machine_learning_test_dataset_then_it_is_a_underfit_model.png" alt="img" style="zoom: 50%;" />
 
-#### 影响因素
+**影响因素**
 
-> 有很多因素可能导致两种拟合问题，这里先着重讨论两个重要因素：`模型复杂度 Model complexity` 和 `训练数据集大小 Training data set size`
+> 有很多因素可能导致两种拟合问题，这里先着重讨论两个重要因素：` 模型复杂度 Model complexity`和 `训练数据集大小 Training data set size`
 
 **Model complexity 模型复杂度**
 
@@ -56,9 +56,9 @@
 $$
 \hat{y} = b + \sum_{k=1}^K x^k w_k
 $$
-**$w_k$** ：权重参数
+**$$w_k：$$ **权重参数
 
-**$b$**: 偏差参数
+**$$b：$$** 偏差参数
 
 > 因为高阶多项式模型函数模型参数更多，模型函数的选择空间更大，所以高阶函数的复杂度更高。因此，高阶函数更容易在相同的训练数据集上得到更低的训练误差。在给定训练数据集中，模型复杂度和误差之间的关系如图：
 
@@ -106,8 +106,6 @@ $$
 在没有label的数据中，试图找到隐藏的结构。**即输入数据有特征无标签，没有标准答案**
 
 - **clustering 聚类：**把训练集中的对象分成若干组，每一组叫一个 `cluster簇`
-
-
 
 
 

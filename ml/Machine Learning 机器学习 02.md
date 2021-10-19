@@ -8,7 +8,7 @@
 
 
 
-### Classification 分类
+### Metrics in classification 分类指标
 
 - **confussion matrix** 混淆矩阵
 - **precision** 精确率
@@ -32,7 +32,7 @@
 
 P (Postive）：spam
 
-N (Nagitive) : Not-spam
+N (Negative) : Not-spam
 
 上述的混淆矩阵表示：
 
@@ -43,11 +43,29 @@ N (Nagitive) : Not-spam
 
 #### Precision
 
-模型在`预测`**正类**时正确的频率
+模型在 `预测` **正类**时正确的频率
 $$
 precision = \frac {TP} {TP + FP}
 $$
 例如，根据上述混淆矩阵，可以得出
 $$
-precision = \frac {TP} {TP + FP} = \frac {23} {23+12}
+precision = \frac {TP} {TP + FP} = \frac {23} {23+12} ≈ 0.657
+$$
+
+#### Recall 
+
+模型在 `所有正类中`，预测正例正确正确的频率
+$$
+recall = \frac { TP } { TP + FN }
+$$
+例如，根据上述混淆矩阵，可以得出
+$$
+recall = \frac {TP} {TP + FN} = \frac {23} {23 + 1} ≈ 0.958
+$$
+
+#### Accuracy
+
+模型在所有正类反类中，预测正确的占比
+$$
+accuray = \frac {TP + TN} {TP + TN + FP + FN}
 $$
