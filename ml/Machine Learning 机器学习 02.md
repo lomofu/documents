@@ -10,14 +10,14 @@
 
 ### Metrics in classification 分类模型的指标
 
-- **confussion matrix** *混淆矩阵*
+- **confusion matrix** *混淆矩阵*
 - **precision** *精确率*
 - **recall** *召回率*
 - **accuracy** *准确性*
 
 
 
-#### Confussion matrix
+#### Confusion matrix
 
 > 一种 NxN 表格，用于总结 `分类模型`的预测效果；即标签和模型预测的分类之间的关联。
 >
@@ -210,6 +210,32 @@ mean_absolute_error(y_true, y_pred)
 
 
 
+## Dataset 数据集
+
+### Get the data 获取数据
+
+常见的数据集获取源：
+
+1. [UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/ml/index.php)
+2. [Kaggle](https://www.kaggle.com/)
+3. [Amazon’s AWS datasets](https://registry.opendata.aws/)
+4. [Data portals](http://dataportals.org/)
+5. [Open data monitor](https://www.opendatamonitor.eu/)
+6. [Quandl](https://www.quandl.com/)
+
+### Partition the data into Three sets 划分三个数据集
+
+对于模型来说，训练集上的误差称为 `training error 训练误差` 或者 `empirical error 经验误差` ，测试集的误差称为` testing error 测试集误差`, 而在新的样本中的误差称为 `generalization error 泛化误差`。上述我们就可以看出，我们更加关注测试误差，因为它是用来**评估摸型对于新样本的学习能力**, 即我们想要模型可以从现有数据中学习到某种规律来用于新样本中，也就是希望模型的泛化能力要强。因此，  我们需要划分三个数据集:
+
+- Training set 训练集 【类似你上课学知识】
+- Validation set  验证集 【相当于课后练习题，用于纠正和强化所学的内容】
+- Test set 测试集 【相当于最终考试，用来检验你的学习成果】
+
+
+
+Training set 
+
+是用来训练模型使用的
 
 
 
@@ -218,9 +244,18 @@ mean_absolute_error(y_true, y_pred)
 
 
 
-# 参考
+
+
+
+
+
+## 参考
 
 1. https://zhuanlan.zhihu.com/p/37246394
 2. https://zhuanlan.zhihu.com/p/147663370
 3. https://ailearning.apachecn.org/#/docs/ml/1
+4. https://cloud.tencent.com/developer/article/1522913
+5. https://zhuanlan.zhihu.com/p/48976706
+6. https://easyai.tech/ai-definition/3dataset-and-cross-validation/
+7. https://www.bilibili.com/video/BV17J411C7zZ?p=6
 

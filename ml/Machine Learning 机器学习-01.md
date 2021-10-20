@@ -47,7 +47,7 @@
 
 **影响因素**
 
-> 有很多因素可能导致两种拟合问题，这里先着重讨论两个重要因素：` 模型复杂度 Model complexity`和 `训练数据集大小 Training data set size`
+> 有很多因素可能导致两种拟合问题，这里先着重讨论两个重要因素： `模型复杂度 Model complexity` 和 `训练数据集大小 Training data set size`
 
 **Model complexity 模型复杂度**
 
@@ -68,7 +68,7 @@ $$
 
 
 
-**Training data set size**
+**Training dataset size** 训练集大小
 
 一般来说，如果训练数据集样本数过少，容易发生过拟合。另外，**泛化误差不会随训练数据集里样本数量增加而增大，因此通常训练数据集可以选择大一些。**
 
