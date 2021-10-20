@@ -223,9 +223,13 @@ mean_absolute_error(y_true, y_pred)
 5. [Open data monitor](https://www.opendatamonitor.eu/)
 6. [Quandl](https://www.quandl.com/)
 
+
+
 ### Partition the data into Three sets 划分三个数据集
 
 对于模型来说，训练集上的误差称为 `training error 训练误差` 或者 `empirical error 经验误差` ，测试集的误差称为` testing error 测试集误差`, 而在新的样本中的误差称为 `generalization error 泛化误差`。上述我们就可以看出，我们更加关注测试误差，因为它是用来**评估摸型对于新样本的学习能力**, 即我们想要模型可以从现有数据中学习到某种规律来用于新样本中，也就是希望模型的泛化能力要强。因此，  我们需要划分三个数据集:
+
+
 
 - Training set 训练集 【类似你上课学知识】
 - Validation set  验证集 【相当于课后练习题，用于纠正和强化所学的内容】
@@ -233,17 +237,135 @@ mean_absolute_error(y_true, y_pred)
 
 
 
-Training set 
+#### Training set 
 
 是用来训练模型使用的
 
 
 
+#### Validation set
+
+当模型训练完成后，对于模型的表现是未知的。这个时候我们可以采用 `Validation set 验证集` , 来看看模型在新数据（验证集和测试集数据是不同的）的表现如何。**同时通过调整超参数（Hyperparameters）使得模型处于最好的状态。**
+
+> **Notation**
+>
+> 验证集是非必要的，如果不需要调整超参数，可以不划分验证集，直接使用测试集来评估结果。
+>
+> **为什么需要验证集？**
+>
+> 虽然模型的泛化误差我们可以通过测试集来估计，也就是直接通过模型在测试集上的误差来调节这些超参数。但是事实上是，可能模型在测试集中的误差为0，但是部署到真实场景中使用，效果可能会更非常差。以上这种现象，称为 `Data Leakage 信息泄露`。因为我们使用测试集作为泛化误差近似，所以不到最后是不能将测试集的信息泄露出去。
+
+
+
+#### Test set
+
+测试集用来最终评估，模型的最终效果以测试集的评估效果为准。
+
+
+
+### 交叉验证法
+
+> 评估模型是否学会了「某项技能」时，**需要用新的数据来评估，而不是用训练集里的数据来评估**。这种「训练集」和「测试集」完全不同的验证方法就是交叉验证法。
+
+#### 3 种主流的交叉验证法
+
+- Holdout cross validation 留出法
+- Leave one out cross validation 留一法
+- k-fold cross validation k折交叉校验
+
+
+
+##### Holdout cross validation 留出法
+
+> 按照固定比例将数据集**静态的**划分为训练集、验证集、测试集的方式
+
+1. 小规模数据集 (万级别以下)，`Training set`, `Validation set` 和 `Test set` 比例是 **6：2：2**
+2. 大规模数据集（百万级以上），可以将`Training set`, `Validation set` 和 `Test set`比例调整为 **98：1：1**
+3. **超参数越少，或者超参数很容易调整**，那么可以减少验证集的比例，更多的分配给训练集
+
+
+
+**通过sklearn实现 使用`随机采样`的方式：**
+
+```python
+import pandas as pd 
+import numpy as np
+from sklearn.model_selection import train_test_split
+
+spam_data = pd.read_csv('https://raw.githubusercontent.com/maalvarezl/MLAI/master/Labs/datasets/spambase.data', header=None)
+spam_data = pd.read_csv('https://raw.githubusercontent.com/maalvarezl/MLAI/master/Labs/datasets/spambase.data', header=None)
+spam_names_list = pd.read_csv('https://raw.githubusercontent.com/maalvarezl/MLAI/master/Labs/datasets/spambase.data.names', header=None)
+number_names = np.shape(spam_names_list)[0]
+spam_names = ['None']*number_names
+for i in range(number_names):
+    local = spam_names_list[0][i]
+    colon_pos = local.find(':')
+    spam_names[i] = local[:colon_pos]
+spam_data.columns = spam_names
+
+# data:需要进行分割的数据集
+# random_state:设置随机种子，保证每次运行生成相同的随机数
+# test_size:将数据分割成训练集的比例
+train_set, test_set = train_test_split(spam_data, test_size=0.2, random_state=42)
+
+# [4601 rows x 58 columns]
+print(spam_data)
+# [3680 rows x 58 columns]
+print(train_set)
+# [921 rows x 58 columns]
+print(test_set)
+```
+
+纯随机的采样方式对于**大量数据集**以及对于**目标值分布均匀**的情况是可行的。
+
+
+
+**通过sklearn实现 使用`分层采样`的方式**
+
+**当数据集中数据分布不均匀**，比如一个数据集中，90%都是正类，剩余10%是负类。那么如果采用随机采样，有一种极端情况就是，所有的正类都划分到训练集，而测试集中式负类。这样训练出的模型，效果一定不会太好。而**采用分层的方式，可以保证划分出的训练集既包含一定比例的正类又包含一定比例的负类。**
+
+```python
+from sklearn.model_selection import StratifiedShuffleSplit
+# 自变量
+X = np.array([[1, 2], [3, 4], [5, 6], [7, 8],[1,2],[1,2]])
+# 因变量
+y = np.array([0, 0, 1, 1, 1, 1])
+
+split = StratifiedShuffleSplit(n_splits=3, test_size=0.3, random_state=0)
+
+for train_index, test_index in split.split(X,y):
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+
+print(y_train)
+print(y_test)
+```
+
+> **n_splits int，默认为10**
+>
+> *重新改组和拆分迭代的次数。***如果我们要划分训练集和测试集的话，将其设置为1即可**
+>
+> **test_size 浮点数，整数，None，可选（默认值：None）**
+>
+> *如果为float，则应在0.0到1.0之间，代表测试集占总数据集的比例。如果为int，则表示测试集中样本的绝对数量。如果为None，则将值设置为train_size的补数。如果train_size也是None，则将其设置为0.1。*
+>
+> **train_size 浮点数，整数或None，默认为None**
+>
+> *如果为float，则应在0.0到1.0之间，表示训练集占总数据集的比例。如果为int，则表示训练集中样本的绝对数量。如果为None，则该值将自动设置为测试集的补数。*
+>
+> **random_state int，RandomState实例或None，可选（默认值：无）**
+>
+> *如果int, random_state是随机数生成器使用的种子;如果RandomState实例，random_state是随机数生成器;如果为None，随机数生成器就是np.random使用的RandomState实例。*
 
 
 
 
 
+##### Leave one out cross validation 留一法
+
+> 每次的测试集都**只有一个样本**，要进行m次训练和预测。
+
+这种方法用于训练的数据只比整体数据集少了一个样本，因此最接近原始样本的分布。但是训练的复杂度增加，因为模型的数量与原始数据相同。**一般用于缺乏数据时使用。**
 
 
 
@@ -258,4 +380,5 @@ Training set
 5. https://zhuanlan.zhihu.com/p/48976706
 6. https://easyai.tech/ai-definition/3dataset-and-cross-validation/
 7. https://www.bilibili.com/video/BV17J411C7zZ?p=6
+8. https://blog.csdn.net/JT_WPC/article/details/104565877
 
