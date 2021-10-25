@@ -263,7 +263,7 @@ mean_absolute_error(y_true, y_pred)
 
 
 
-### 交叉验证法
+### Cross validation 交叉验证法
 
 > 评估模型是否学会了「某项技能」时，**需要用新的数据来评估，而不是用训练集里的数据来评估**。这种「训练集」和「测试集」完全不同的验证方法就是交叉验证法。
 
@@ -343,21 +343,11 @@ print(y_test)
 
 > **n_splits int，默认为10**
 >
-> *重新改组和拆分迭代的次数。***如果我们要划分训练集和测试集的话，将其设置为1即可**
+> *重新改组和拆分迭代的次数。* **如果我们要划分训练集和测试集的话，将其设置为1即可**
 >
 > **test_size 浮点数，整数，None，可选（默认值：None）**
 >
 > *如果为float，则应在0.0到1.0之间，代表测试集占总数据集的比例。如果为int，则表示测试集中样本的绝对数量。如果为None，则将值设置为train_size的补数。如果train_size也是None，则将其设置为0.1。*
->
-> **train_size 浮点数，整数或None，默认为None**
->
-> *如果为float，则应在0.0到1.0之间，表示训练集占总数据集的比例。如果为int，则表示训练集中样本的绝对数量。如果为None，则该值将自动设置为测试集的补数。*
->
-> **random_state int，RandomState实例或None，可选（默认值：无）**
->
-> *如果int, random_state是随机数生成器使用的种子;如果RandomState实例，random_state是随机数生成器;如果为None，随机数生成器就是np.random使用的RandomState实例。*
-
-
 
 
 
@@ -367,9 +357,112 @@ print(y_test)
 
 这种方法用于训练的数据只比整体数据集少了一个样本，因此最接近原始样本的分布。但是训练的复杂度增加，因为模型的数量与原始数据相同。**一般用于缺乏数据时使用。**
 
+通过sklearn实现
+
+```python
+import numpy as np
+from sklearn.model_selection import LeaveOneOut
+X = np.array([[1, 2], [3, 4], [5, 6], [7, 8],[1,2],[1,2]])
+
+split = LeaveOneOut()
+
+for train_index, test_index in split.split(X):
+    X_train, X_test = X[train_index], X[test_index]
+
+
+print(X_train)
+print(X_test)
+```
 
 
 
+K-fold cross validation k折交叉验证
+
+> 这是一种动态验证的方式，可以降低数据划分带来的影响。 
+
+1. 将数据划分为训练集和测试集
+2. 将`训练集`分成k组（大小相似的互斥子集）
+3. 每次使用k份中的**1份作为`测试集`**，**其他k-1用作`训练集`**，尽量保证每个子集数据分布的一致性
+4. 依次得到测试结果s1,s2,…,sk
+5. 对上述k个测试结果取平均值作为参数/模型的性能评估
+
+
+
+10折交叉验证
+
+![img](img/01/5771e48767a65.png)
+
+> 1. **数据量小的时候**，k一般取10，也可以取大一点，这样训练集占整体数据集的比例大，但同时训练的模型也会变多。
+>
+> 2. **数据量大的时候**，k可以设置小一点。
+> 3. K折交叉验证使用不重复采样，优点是每个样本只会在训练活测试中出现一次。这样得到的模型评估结果有更低的方法。
+
+```python
+import numpy as np
+from sklearn.model_selection import StratifiedKFold
+
+
+X = np.array([[1, 2], [3, 4], [1, 2], [3, 4]])
+y = np.array([0, 0, 1, 1])
+
+kfold = StratifiedKFold(n_splits=2)
+
+splits = 1
+
+for train_index,test_index in kfold.split(X,y):
+  X_train, X_test  = X[train_index], X[test_index]
+  y_train, y_test  = y[train_index], y[test_index]
+  print('split: {} Train: {} Test: {} \n'.format(splits,X_train, X_test))
+  print('split: {} Train: {} Test: {} \n'.format(splits,y_train, y_test))
+  print()
+  splits += 1
+
+```
+
+### Explore the data 数据探索
+
+#### Scatter plot 散点图
+
+> 通过绘制散点图判断变量之间的关系形态
+
+![](img/02/v2-c74ee52e4c6d961b6927bed62d331d91_r.jpg)
+
+如果要判断多个数据的之间的关系，散点图的绘制就会显得比较繁琐，这时候要选择绘制散点矩阵，例如下图所示
+
+<img src="img/02/image-20211025005237285.png" alt="image-20211025005237285" style="zoom: 50%;" />
+
+
+
+#### Correlation coefficient 相关系数
+
+> 是根据样本数据计算的度量两个变量之间**线性关系**强度的统计量。也称线性相关系数或Pearson相关系数
+
+$$
+r (X,Y) = \rho _x,_y = \frac {E \{ (X  -\mu_x) (Y- \mu_y) \}} { \sigma_x \sigma_y} = \frac {Cov(X,Y)} {\sigma_x \sigma_y}
+$$
+
+
+
+
+$$
+\rho _x,_y 是一个可以表征x和y之间线性关系紧密程度的量, 以下用r代替
+$$
+
+>  r 的值 **大于-1 小于1**
+
+
+
+<img src="img/02/v2-d857f8b51a7a4b598cc1c104a2cc594e.png" alt="preview" style="zoom:50%;" />
+
+> 相关系数越接近 1，正相关的程度越高。也就是说，一方数据增加，另一方数据也会随之增加。二者完全成比例（如果一方增至 2 倍，另一方也随之变为 2 倍）时的相关系数最大，是 1。相关系数为 0，表示两个数据没有任何关联，互相独立。实际业务中使用的第一手数据，一般都不是 0 或者 1 所表示的完全不相关或者完全成比例相关，而是介于二者之间。
+
+<img src="../../../../Library/Application Support/typora-user-images/image-20211025005847927.png" alt="image-20211025005847927" style="zoom: 50%;" />
+
+
+
+### Prepare for data 数据准备
+
+#### Data Cleaning 数据清理
 
 ## 参考
 
@@ -381,4 +474,7 @@ print(y_test)
 6. https://easyai.tech/ai-definition/3dataset-and-cross-validation/
 7. https://www.bilibili.com/video/BV17J411C7zZ?p=6
 8. https://blog.csdn.net/JT_WPC/article/details/104565877
-
+9. https://ljalphabeta.gitbooks.io/python-/content/kfold.html
+10. https://www.cnblogs.com/jiaxin359/p/8552800.html
+11. https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html?highlight=stratifiedkfold#sklearn.model_selection.StratifiedKFold
+12. https://zhuanlan.zhihu.com/p/99123384
