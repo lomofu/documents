@@ -419,7 +419,11 @@ for train_index,test_index in kfold.split(X,y):
 
 ```
 
-### Explore the data 数据探索
+
+
+
+
+### Explore the data 探索性数据分析
 
 #### Scatter plot 散点图
 
@@ -458,11 +462,184 @@ $$
 
 <img src="../../../../Library/Application Support/typora-user-images/image-20211025005847927.png" alt="image-20211025005847927" style="zoom: 50%;" />
 
+通过pandas实现相关性计算
+
+> `pandas`中`DataFrame`对象`corr()`方法的用法，该方法用来计算DataFrame对象中所有列之间的相关系数（**包括pearson相关系数、Kendall Tau相关系数和spearman秩相关**）
+
+```python
+import numpy as np
+import pandas as pd 
+
+data = pd.DataFrame({
+    'A': np.random.randint(1,100,10),
+    'B': np.random.randint(1,100,10),
+    'C': np.random.randint(1,100,10),
+})
+
+print(data)
+
+# 计算pearson相关系数
+
+pearson = data.corr()
+print(pearson)
+
+# 计算kendall相关系数
+kendall = data.corr('kendall')
+print(kendall)
+
+# 计算spearman相关系数
+spearman = data.corr('spearman')
+print(spearman)
+```
+
+
+
 
 
 ### Prepare for data 数据准备
 
 #### Data Cleaning 数据清理
+
+- 删除数据中的异常值 (可选)
+
+- 处理缺失的数据
+  - 最常见的方式，用其所在列的**均值**来填充（利用 scikit-learn 预处理模型中的 `Imputer` 类来很轻松实现）
+  - 如果数据集足够大并且缺失值的百分比很高（例如，超过50％），则可以**删除包含数据的行 ( pandas DataFrame 对象中的 `dropna`方法)**
+  - 可以用0填充所有空变量来处理数值
+
+
+
+#### Handle Categories 处理分类数据
+
+> 机器学习仅使用数值（float或int数据类型）。因此，可以编码为虚拟变量，为每个类别分配一个数字。最简单的方法是使用`One-hot encoding `
+
+
+
+**通过sklearn的OneHotEncoder**
+
+```python
+import numpy as np
+from sklearn.preprocessing import OneHotEncoder
+
+
+X = np.array([['b',2],['c',3],['a',8],['b',4],['a',4.9]])
+print(X)
+enc = OneHotEncoder(handle_unknown='ignore')
+
+enc.fit(X)
+print(enc.categories_)
+
+X_encoding = enc.fit_transform(X).toarray()
+print(X_encoding)
+```
+
+
+
+#### Feature scaling 缩放和规范化
+
+因为线性回归、逻辑回归对于数值的大小很敏感，因此需要将不同量级的数据进行数值进行归一化。常见的缩放到 **[0,1]区间，或者 [-1,1]区间。**
+
+
+
+##### **Min-Max Normalization Min-Max归一化**
+
+>  也称`极差法` ,它是将数据集中某一列数值缩放到**0和1之间**。
+
+**公式**
+$$
+{x}’=\frac{x-x_{min}}{x_{max}-x_{min}}
+$$
+
+> 注： 上述公式是缩放到0，1区间，如果需要缩放到指定区间，公式完整如下
+
+$$
+{x}’=\frac{x-x_{min}}{x_{max}-x_{min}} \times (high - low) + low
+$$
+
+> **high**为区间右边的最大值，**low**为区间左边的最小值
+
+
+
+**通过sklearn实现**
+
+```python
+from sklearn.preprocessing import minmax_scale
+import numpy as np
+
+X = '42 47 59 27 84 49 72 43 73 59 58 82 50 79 89 75 70 59 67 35'
+X = X.split()
+
+X = [int(i) for i in X]
+
+# 缩放到0，1区间
+X_normal = minmax_scale(X)
+
+# 缩放到-1，1区间
+X_normal1 = 2 * minmax_scale(X) -1  
+
+print(X_normal)
+```
+
+
+
+##### Z-score Standardization Z标准化
+
+也叫`标准差标准化`，代表的是分值偏离均值的程度，经过处理的数据符合**标准正态分布**，**即均值为0，标准差为1**。
+
+**公式**
+$$
+{x}’= \frac{x-\mu }{\sigma }
+$$
+**通过sklearn实现**
+
+```python
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+X = '42 47 59 27 84 49 72 43 73 59 58 82 50 79 89 75 70 59 67 35'
+X_raw = stu_score.split()
+
+X = np.array([X_raw])
+X.shape = len(X_raw),1
+
+X_stand = StandardScaler().fit(X)
+X_stand.transform(X)
+```
+
+
+
+##### 标准化、归一化的区别
+
+**相同**
+
+> 1. 都是对某个特征（或某一列，或某个样本）的数据进行缩放
+
+
+
+**差异**
+
+> 1. `Normalisation` **受离群点的影响大**
+> 2. `Standardisation` **受离群点影响小**，因为重新创建一个新的数据分布
+
+
+
+**选择**
+
+- 如果**数据集小而稳定**，选择**归一化**
+- 如果**数据集大且中含有噪声和异常值**，可以选择**标准化**。
+
+
+
+#### Short-List Promising Models 列出可能的模型
+
+- 如果数据过大，需要抽取较小的训练集，以便在合理时间内训练不同的训练模型。
+- 使用标准参数训练不同类别的快速模型（例如，线性，朴素贝叶斯，SVM，随机森林，神经网络等）
+
+
+
+
+
+
 
 ## 参考
 
@@ -478,3 +655,8 @@ $$
 10. https://www.cnblogs.com/jiaxin359/p/8552800.html
 11. https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html?highlight=stratifiedkfold#sklearn.model_selection.StratifiedKFold
 12. https://zhuanlan.zhihu.com/p/99123384
+13. https://www.jiqizhixin.com/articles/2019-02-21-15
+14. https://easyai.tech/blog/data-cleaning-and-preprocessing-for-beginners/
+15. https://www.biaodianfu.com/feature-scaling-normalization-vs-standardization.html#Z%E6%A0%87%E5%87%86%E5%8C%96%EF%BC%9A%E5%AE%9E%E7%8E%B0%E4%B8%AD%E5%BF%83%E5%8C%96%E5%92%8C%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83
+16. https://www.datalearner.com/blog/1051521208408652
+
