@@ -1,4 +1,4 @@
-# Machine Learning 机器学习 01
+# Machine Learning 机器学习 01基础
 
 简而言之，机器学习是从给定数据集中自动分析获得模型，并利用模型来进行预测
 
