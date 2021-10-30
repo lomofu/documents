@@ -90,7 +90,7 @@ $$
 > 根据题意，得出**D=6**，**A=Suspicious words**
 > $$
 > H(D|A)  = - \sum_{a \in A} {p(a)} \sum_{ d \in D} {p(d|a)} \ log \ p(d|a) \\
->  = - [(\frac {3}{6} \times (\frac {3}{3} \times log_2(\frac{3}{3}) + \frac {0}{3} \times log_2(\frac {0}{3}))) + \frac{3}{6} \times (\frac{3}{3} \times log_2(\frac {3}{3}) + \frac{0}{3} \times log_2(\frac{3}{3}))] \\
+>  = - [(\frac {3}{6} \times (\frac {3}{3} \times log_2(\frac{3}{3}) + \frac {0}{3} \times log_2(\frac {0}{3}))) + \frac{3}{6} \times (\frac{3}{3} \times log_2(\frac {3}{3}) + \frac{0}{3} \times log_2(\frac{0}{3}))] \\
 >  = 0 bits
 > $$
 
@@ -98,7 +98,7 @@ $$
 
 
 
-## 信息增益 Information Gain
+## 信息增益 / 互信息 Information Gain
 
 信息增益表示在添加信息后能减少多少不确定性。
 
@@ -111,29 +111,138 @@ $$
 
 
 
-> 根据条件熵中给定的例子,通过计算可以得到
+> 根据条件熵中给定的例子,将 Supsicious words、Unknown sender、Contains images 代表为 {A, B, C}
+>
+> 根据题意，得出**D=6**，A=Suspicious words, 通过计算可以得到 
 > $$
-> H(D) = - \sum_{i \in \{ 'spam' ,\ 'ham' \}} (P(i) \times log_2 {P})
+> H(D) = -\sum_{i \in \{ 'spam' ,\ 'ham' \}} (P(i) \times log_2 {P(i)}) \\
+> = - ((P(i='spam') \times log_2(P(i='spam'))) + P(i='ham' \times log_2(P(i='ham')))) \\
+> = - ((\frac {3}{6} \times log_2(\frac{3}{6})) +(\frac {3}{6} \times log_2(\frac{3}{6}))　\\
+> ＝　1 bit
+> $$
+> 
+> $$
+> H(D|A) = - \sum_{a \in A} {p(a)} \sum_{ d \in D} {p(d|a)} \ log \ p(d|a) \\
+> = - [(\frac {3}{6} \times (\frac{3}{3} \times log_2(\frac {3}{3})+ (\frac{0}{3}) \times log_2(\frac{0}{3})) + \frac{3}{6} \times (\frac{3}{3} \times log_2(\frac{3}{3})+\frac{0}{3} \times log_2(\frac{0}{3}))]
+> = 0 bits
+> $$
+> 因此
+> $$
+> IG(D|A) = 1	bits - 0 bits = 1 bits
 > $$
 
 
 
+## 处理连续性特征 Handling continuous features
 
-## 决策树学习的 3 个步骤
+### 将连续性特征转换为布尔特征
 
-特征选择
+- 对于连续性特征，我们可以定义一个 `阈值 Threshold` 把它们变成布尔特征
+- `阈值 Threshold` 用来对连续性特征值的实例进行划分
 
+### 排序实例 Sorting the instances
 
-
-决策树生成
-
-
-
-决策树剪枝
-
+- 根据连续性特征的值将数据集中的实例进行排序
+- 在排序中，具有不同分类的相邻则被选为可能的阈值点
+- 最优的阈值点可以通过计算每一个分类过渡边界的 `信息增益 Information Gain` 并选择最高 `信息增益 Information Gain`的边界作为阈值
 
 
-## 参考
+
+### 将特征作为分类特征 Treat the feature as a categorial feature
+
+- 一旦设置了阈值，动态创建的新布尔特征可以与其他分类特征竞争，作为该节点的分割特征
+- 在树的生成过程中，这一过程可以重复在每个节点中进行
+
+ 
+
+### 例子 Example
+
+给定数据集如下：
+
+![image-20211030224312486](img/03/image-20211030224312486.png)
+
+1. Sorting the instances
+
+根据连续型特征 **`Elevation`**排序，得到
+
+![image-20211030225027185](img/03/image-20211030225027185.png)
+
+
+
+2. Thresholds and partitions
+
+例如根据阈值 ≥750, ≥1 350, ≥2 250 和 ≥4 175.
+
+以≥750为例子
+
+可以分为：
+
+| Threshold | Part                   |
+| --------- | ---------------------- |
+| ≥750      | d2,                    |
+| ≥750      | d4, d3, d7, d1. d5, d6 |
+
+> $$
+> H(D) = - (\sum_{l \in \{ 'riparian','chapparal', 'conifer'\}} P(i=l) \times log_2(P(i=l))) \\
+> = - (\frac {2}{7} \times log_2(\frac {2}{7})+ \frac {3}{7} \times log_2(\frac {3}{7}) + \frac {2}{7} \times log_2(\frac {2}{7})) \\
+> ≈ 1.55665
+> $$
+>
+> $$
+> H(D | threshold ≥750) = \sum_{a \in {threeshold ≥750}} P(i=a) \sum_{d \in \{'riparian','chapparal', 'conifer'\}} P(d|a)*log_2(P(d|a)) \\ = - (\frac {1}{7} \times ((\frac{1}{1} \times log_2(\frac{1}{1})+\frac {0}{1} \times log_2(\frac {0}{1})+\frac {0}{1} \times log_2(\frac {0}{1}))+ \\
+> \frac{6}{7} \times ((\frac{3}{6} \times log_2(\frac{3}{6})+\frac{1}{6} \times log_2(\frac{1}{6})+\frac{2}{6} \times log_2(\frac {2}{6}))) \\
+> ≈ 1.25069
+> $$
+>
+> $$
+> IG(D|threshold ≥750) = H(D) - H(D|threshold ≥750) = 0.3060
+> $$
+
+以此类推，可以得到
+
+![image-20211030233505648](img/03/image-20211030233505648.png)
+
+
+
+## Growing a tree决策树生成
+
+### ID3 Algorithm (Iterative Dichotomiser 3)
+
+它利用**信息增益 `Information Gain`**来选取特征。 创建一个多路树，找出每个节点（即以贪心的方式）分类特征，这会产生分类目标的最大信息增益。决策树发张大最大的尺寸，通常利用剪枝来提高数对未知数据的泛化能力。
+
+### C4.5 Algorithm
+
+是ID3的改进版，不直接使用信息增益，而是引入了”信息增益“指标作为特征的选择依据。
+
+### CARD (Classification and Regression Trees)
+
+此算法可以用与分类与回归两种问题。**CART 算法使用了基尼系数取代信息熵模型。**
+
+*scikit-learn 使用 CART 算法的优化版本。*
+
+### 三者比较
+
+| 算法 | 支持模型   | 树结构 | 特征选择                  | 连续值处理 | 缺失值处理 | 剪枝 |
+| ---- | ---------- | ------ | ------------------------- | ---------- | ---------- | ---- |
+| ID3  | 分类       | 多叉树 | 信息增益 Information Gain | No         | No         | No   |
+| C4.5 | 分类       | 多叉树 | 信息增益比                | Yes        | Yes        | Yes  |
+| CART | 分类，回归 | 二叉树 | 基尼指数，均方差          | Yes        | Yes        | Yes  |
+
+
+
+## Regression trees 回归树
+
+
+
+
+
+
+
+
+
+
+
+# 参考
 
 1. https://ljalphabeta.gitbooks.io/python-/content/tree.html
 2. https://ailearning.apachecn.org/#/docs/ml/3
@@ -143,3 +252,4 @@ $$
 6. http://www.woshipm.com/pmd/3993547.html
 7. https://blog.csdn.net/zhangyingjie09/article/details/85639641
 8. https://cloud.tencent.com/developer/article/1475554
+9. https://zhuanlan.zhihu.com/p/82054400
