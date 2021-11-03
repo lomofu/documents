@@ -339,6 +339,27 @@ $$
 - **使用验证集评估**  `完全生长的树` 和`修剪后的树` 所达到的预测精度。
 - 如果修剪后的树的表现不比完全生长的树差，那么该节点就是修剪的候选对象。
 
+<img src="img/03/Screen Shot 2021-11-02 at 13.27.15.png" alt="Screen Shot 2021-11-02 at 13.27.15" style="zoom:50%;" />
+
+如上图，**横轴**表示决策树创建过程中树的结点数，**纵轴**表示决策树的代价（错误分类的比率）。
+
+- 可以看出，随着树的增长，训练集（红色虚线）的精度是单调上升的，即图中红色虚线的Cost一直在下降。
+- 然而Cross-validation的精度却出现了波动，即精度先上升，后下降。在图中粉色圈出最佳选择后，精度开始下降。
+
+
+
+## Model ensemble 集成学习
+
+是对其他算法进行组合的一种形式，是一种**训练思路**，并不是某种具体的方法或者算法。通俗的说，当做重要决定时，可能希望西区多个专家而不是一个人的建议。
+
+
+
+### boosting 再学习
+
+boosting的核心思路是**挑选精英**。
+
+
+
 
 
 
@@ -356,4 +377,7 @@ $$
 9. https://zhuanlan.zhihu.com/p/82054400
 10. https://www.devtalking.com/articles/machine-learning-16/
 11. https://blog.csdn.net/u012328159/article/details/70184415
-12. https://blog.csdn.net/u012328159/article/details/79285214å
+12. https://blog.csdn.net/u012328159/article/details/79285214
+13. https://zhuanlan.zhihu.com/p/30296061
+14. https://ailearning.apachecn.org/#/docs/ml/7
+
